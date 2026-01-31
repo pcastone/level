@@ -42,6 +42,13 @@ anyhow = "1"
 async-trait = "0.1"
 validator = { version = "0.18", features = ["derive"] }
 
+# CLI
+clap = { version = "4", features = ["derive", "env"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+tabled = "0.16"
+colored = "2"
+dirs = "5"
+
 # SSL/TLS
 rustls = "0.23"
 tokio-rustls = "0.26"
@@ -56,8 +63,12 @@ tokio-test = "0.4"
 sqlx = { version = "0.7", features = ["runtime-tokio", "postgres"] }
 
 [[bin]]
-name = "level"
+name = "level-api"
 path = "src/main.rs"
+
+[[bin]]
+name = "level"
+path = "src/cli/main.rs"
 
 [profile.release]
 lto = true

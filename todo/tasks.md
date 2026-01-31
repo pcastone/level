@@ -257,71 +257,71 @@ Rebuild the Level project management system in Rust for the backend API and CLI 
 
 ---
 
-## Phase 7: CLI Client 🔲 NOT STARTED
+## Phase 7: CLI Client ✅ COMPLETED
 
 ### Task 7.1: Configuration
-- [ ] Parse ~/.level/config.toml
-- [ ] Support api_url, api_key, default_sow settings
-- [ ] Add output_format preference (table, json, minimal)
+- [x] Parse ~/.level/config.toml
+- [x] Support api_url, api_key, default_sow settings
+- [x] Add output_format preference (table, json, minimal)
 
 ### Task 7.2: HTTP client
-- [ ] Create LevelClient struct with reqwest
-- [ ] Inject X-API-Key header
-- [ ] Handle response parsing
-- [ ] Implement error handling
+- [x] Create LevelClient struct with reqwest
+- [x] Inject X-API-Key header
+- [x] Handle response parsing
+- [x] Implement error handling
 
 ### Task 7.3: Reference resolution
-- [ ] Implement UUID resolution
-- [ ] Implement ShortName resolution (regex match)
-- [ ] Implement Alias resolution (* prefix)
-- [ ] Implement Title resolution (quoted strings)
-- [ ] Create resolution chain
+- [x] Implement UUID resolution
+- [x] Implement ShortName resolution (regex match)
+- [x] Implement Alias resolution (* prefix)
+- [x] Implement Title resolution (quoted strings)
+- [x] Create resolution chain
 
 ### Task 7.4: SOW commands
-- [ ] level sows - list SOWs
-- [ ] level sow create <short_name> <title>
-- [ ] level sow show <reference>
-- [ ] level sow set-default <reference>
+- [x] level sows - list SOWs
+- [x] level sow create <short_name> <title>
+- [x] level sow show <reference>
+- [x] level sow set-default <reference>
 
 ### Task 7.5: Noun commands
-- [ ] level nouns [--type TYPE] [--state STATE] [--blocked]
-- [ ] level noun create <type> <title> [--parent REF]
-- [ ] level noun show <reference>
-- [ ] level noun update <reference> field=value...
+- [x] level nouns [--type TYPE] [--state STATE] [--blocked]
+- [x] level noun create <type> <title> [--parent REF]
+- [x] level noun show <reference>
+- [x] level noun update <reference> field=value...
 
 ### Task 7.6: Verb commands
-- [ ] level complete <reference>...
-- [ ] level incomplete <reference>...
-- [ ] level escalate <reference>...
-- [ ] level normal <reference>...
-- [ ] level close <reference>...
-- [ ] level blocked <blocker_ref> <target_ref>
-- [ ] level release <blocker_ref> <target_ref>
-- [ ] level assign <noun_ref> <container_ref>
-- [ ] level unassign <noun_ref> <container_ref>
-- [ ] level reparent <noun_ref> [parent_ref]
+- [x] level complete <reference>...
+- [x] level incomplete <reference>...
+- [x] level escalate <reference>...
+- [x] level normal <reference>...
+- [x] level close <reference>...
+- [x] level blocked <blocker_ref> <target_ref>
+- [x] level release <blocker_ref> <target_ref>
+- [x] level assign <noun_ref> <container_ref>
+- [x] level unassign <noun_ref> <container_ref>
+- [x] level reparent <noun_ref> [parent_ref]
 
 ### Task 7.7: View commands
-- [ ] level timeline [--start DATE] [--end DATE]
-- [ ] level kanban [--container REF]
-- [ ] level calendar [--month YYYY-MM]
+- [x] level timeline [--start DATE] [--end DATE]
+- [x] level kanban [--container REF]
+- [x] level calendar [--month YYYY-MM]
 
 ### Task 7.8: Alias commands
-- [ ] level aliases - list aliases
-- [ ] level alias create <name> <noun_ref>
-- [ ] level alias delete <name>
+- [x] level aliases - list aliases
+- [x] level alias create <name> <noun_ref>
+- [x] level alias delete <name>
 
 ### Task 7.9: Help commands
-- [ ] level help nouns [TYPE]
-- [ ] level help verbs [VERB]
-- [ ] level help containers
-- [ ] level help roles
+- [x] level help nouns [TYPE]
+- [x] level help verbs [VERB]
+- [x] level help containers
+- [x] level help roles
 
 ### Task 7.10: Output formatting
-- [ ] Implement table formatter
-- [ ] Implement JSON formatter
-- [ ] Implement minimal formatter
-- [ ] Add color support
+- [x] Implement table formatter (tabled)
+- [x] Implement JSON formatter
+- [x] Implement minimal formatter
+- [x] Add color support (colored)
 
 ---
 
@@ -383,7 +383,7 @@ Rebuild the Level project management system in Rust for the backend API and CLI 
 | 4. Services | 5 | ✅ COMPLETED |
 | 5. Verb Handlers | 12 | ✅ COMPLETED |
 | 6. REST API | 9 | ✅ COMPLETED |
-| 7. CLI Client | 10 | 🔲 NOT STARTED |
+| 7. CLI Client | 10 | ✅ COMPLETED |
 | 8. Testing | 4 | 🔲 NOT STARTED |
 | 9. Deployment | 3 | 🔲 NOT STARTED |
 
@@ -414,7 +414,7 @@ Rebuild the Level project management system in Rust for the backend API and CLI 
 level/
 ├── Cargo.toml
 ├── src/
-│   ├── main.rs              # Entry point
+│   ├── main.rs              # API server entry point
 │   ├── api/                  # REST API layer
 │   │   ├── mod.rs           # Route composition
 │   │   ├── state.rs         # AppState
@@ -426,6 +426,21 @@ level/
 │   │   ├── admin.rs         # Admin endpoints
 │   │   ├── user.rs          # User endpoints
 │   │   └── help.rs          # Help endpoints
+│   ├── cli/                  # CLI client
+│   │   ├── main.rs          # CLI entry point
+│   │   ├── client.rs        # HTTP client
+│   │   ├── config.rs        # CLI configuration
+│   │   ├── output.rs        # Output formatting
+│   │   ├── reference.rs     # Reference resolution
+│   │   └── commands/        # Command handlers
+│   │       ├── mod.rs
+│   │       ├── sow.rs
+│   │       ├── noun.rs
+│   │       ├── verb.rs
+│   │       ├── view.rs
+│   │       ├── alias.rs
+│   │       ├── help.rs
+│   │       └── user.rs
 │   ├── db/                   # Database layer
 │   │   ├── mod.rs
 │   │   ├── pool.rs          # Connection pool
@@ -457,3 +472,7 @@ level/
 └── docs/
     └── project-management-schema.md
 ```
+
+## Binaries
+- `level-api` - REST API server
+- `level` - CLI client
