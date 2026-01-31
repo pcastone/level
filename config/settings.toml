@@ -1,0 +1,40 @@
+# Level API Server Configuration
+# Environment variables override these settings
+
+[server]
+port = 8080
+host = "0.0.0.0"
+
+[database]
+# Override with DATABASE_URL env var
+url = "postgres://level:level@localhost:5432/level"
+max_connections = 10
+connect_timeout_secs = 30
+
+# Deployment modes: skinny, standard, enterprise
+# Override with DEPLOYMENT_MODE env var
+deployment_mode = "standard"
+
+# API authentication key
+# Override with API_KEY env var
+api_key = "dev-api-key"
+
+[logging]
+# Log level: trace, debug, info, warn, error
+# Override with RUST_LOG env var
+level = "info"
+# Set to true for JSON structured logs
+# Override with LOG_JSON=true env var
+json_output = false
+
+# Optional: Redis configuration (for enterprise mode)
+# Override with REDIS_URL env var
+# [redis]
+# url = "redis://localhost:6379"
+
+# Optional: SSL/TLS configuration
+# [ssl]
+# enabled = false
+# cert_path = "config/cert.pem"
+# key_path = "config/key.pem"
+# auto_generate = true

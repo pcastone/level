@@ -326,3 +326,186 @@ pub struct NounListResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub next_cursor: Option<String>,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // NounType tests
+    #[test]
+    fn test_noun_type_all() {
+        assert_eq!(NounType::all().len(), 12);
+    }
+
+    #[test]
+    fn test_noun_type_from_str() {
+        assert_eq!(NounType::from_str("sow"), Some(NounType::Sow));
+        assert_eq!(NounType::from_str("SOW"), Some(NounType::Sow));
+        assert_eq!(NounType::from_str("task"), Some(NounType::Task));
+        assert_eq!(NounType::from_str("Task"), Some(NounType::Task));
+        assert_eq!(NounType::from_str("request"), Some(NounType::Request));
+        assert_eq!(NounType::from_str("meeting"), Some(NounType::Meeting));
+        assert_eq!(NounType::from_str("deliverable"), Some(NounType::Deliverable));
+        assert_eq!(NounType::from_str("event"), Some(NounType::Event));
+        assert_eq!(NounType::from_str("blocker"), Some(NounType::Blocker));
+        assert_eq!(NounType::from_str("artifact"), Some(NounType::Artifact));
+        assert_eq!(NounType::from_str("group"), Some(NounType::Group));
+        assert_eq!(NounType::from_str("project"), Some(NounType::Project));
+        assert_eq!(NounType::from_str("milestone"), Some(NounType::MileStone));
+        assert_eq!(NounType::from_str("invalid"), None);
+        assert_eq!(NounType::from_str(""), None);
+    }
+
+    #[test]
+    fn test_noun_type_is_container() {
+        assert!(NounType::Group.is_container());
+        assert!(NounType::Project.is_container());
+        assert!(NounType::MileStone.is_container());
+        assert!(!NounType::Task.is_container());
+        assert!(!NounType::Sow.is_container());
+        assert!(!NounType::Artifact.is_container());
+    }
+
+    #[test]
+    fn test_noun_type_is_leaf_only() {
+        assert!(NounType::Artifact.is_leaf_only());
+        assert!(!NounType::Task.is_leaf_only());
+        assert!(!NounType::Project.is_leaf_only());
+    }
+
+    #[test]
+    fn test_noun_type_can_be_goal() {
+        assert!(NounType::Deliverable.can_be_goal());
+        assert!(NounType::Event.can_be_goal());
+        assert!(!NounType::Task.can_be_goal());
+        assert!(!NounType::Project.can_be_goal());
+    }
+
+    #[test]
+    fn test_noun_type_display() {
+        assert_eq!(NounType::Sow.to_string(), "SOW");
+        assert_eq!(NounType::Task.to_string(), "Task");
+        assert_eq!(NounType::MileStone.to_string(), "MileStone");
+    }
+
+    // NounState tests
+    #[test]
+    fn test_noun_state_all() {
+        assert_eq!(NounState::all().len(), 6);
+    }
+
+    #[test]
+    fn test_noun_state_from_str() {
+        assert_eq!(NounState::from_str("normal"), Some(NounState::Normal));
+        assert_eq!(NounState::from_str("Normal"), Some(NounState::Normal));
+        assert_eq!(NounState::from_str("escalated"), Some(NounState::Escalated));
+        assert_eq!(NounState::from_str("completed"), Some(NounState::Completed));
+        assert_eq!(NounState::from_str("incompleted"), Some(NounState::Incompleted));
+        assert_eq!(NounState::from_str("closed"), Some(NounState::Closed));
+        assert_eq!(NounState::from_str("archived"), Some(NounState::Archived));
+        assert_eq!(NounState::from_str("invalid"), None);
+    }
+
+    #[test]
+    fn test_noun_state_is_terminal() {
+        assert!(NounState::Archived.is_terminal());
+        assert!(!NounState::Normal.is_terminal());
+        assert!(!NounState::Closed.is_terminal());
+    }
+
+    #[test]
+    fn test_noun_state_can_complete() {
+        assert!(NounState::Normal.can_complete());
+        assert!(NounState::Escalated.can_complete());
+        assert!(!NounState::Completed.can_complete());
+        assert!(!NounState::Closed.can_complete());
+    }
+
+    #[test]
+    fn test_noun_state_can_close() {
+        assert!(NounState::Completed.can_close());
+        assert!(NounState::Incompleted.can_close());
+        assert!(!NounState::Normal.can_close());
+        assert!(!NounState::Escalated.can_close());
+    }
+
+    #[test]
+    fn test_noun_state_default() {
+        assert_eq!(NounState::default(), NounState::Normal);
+    }
+
+    // Noun struct tests
+    #[test]
+    fn test_noun_new() {
+        let sow_id = Uuid::new_v4();
+        let noun = Noun::new(NounType::Task, sow_id, "IT-TASK-001".to_string(), "Test Task".to_string());
+
+        assert_eq!(noun.get_type(), NounType::Task);
+        assert_eq!(noun.get_state(), NounState::Normal);
+        assert_eq!(noun.sow_id, sow_id);
+        assert_eq!(noun.short_name, "IT-TASK-001");
+        assert_eq!(noun.title, "Test Task");
+        assert!(!noun.is_blocked);
+        assert!(noun.parent_id.is_none());
+    }
+
+    #[test]
+    fn test_noun_is_sow() {
+        let sow_id = Uuid::new_v4();
+        let sow = Noun::new(NounType::Sow, sow_id, "IT".to_string(), "IT SOW".to_string());
+        let task = Noun::new(NounType::Task, sow_id, "IT-TASK-001".to_string(), "Task".to_string());
+
+        assert!(sow.is_sow());
+        assert!(!task.is_sow());
+    }
+
+    #[test]
+    fn test_noun_is_container() {
+        let sow_id = Uuid::new_v4();
+        let project = Noun::new(NounType::Project, sow_id, "IT-PROJ-001".to_string(), "Project".to_string());
+        let task = Noun::new(NounType::Task, sow_id, "IT-TASK-001".to_string(), "Task".to_string());
+
+        assert!(project.is_container());
+        assert!(!task.is_container());
+    }
+
+    #[test]
+    fn test_noun_blocked_goals() {
+        let sow_id = Uuid::new_v4();
+        let mut noun = Noun::new(NounType::Project, sow_id, "IT-PROJ-001".to_string(), "Project".to_string());
+
+        assert_eq!(noun.blocked_goals(), 0);
+
+        noun.custom_fields = serde_json::json!({"blocked_goals": 3});
+        assert_eq!(noun.blocked_goals(), 3);
+    }
+
+    #[test]
+    fn test_noun_goal_noun_ids() {
+        let sow_id = Uuid::new_v4();
+        let goal1 = Uuid::new_v4();
+        let goal2 = Uuid::new_v4();
+        let mut noun = Noun::new(NounType::Project, sow_id, "IT-PROJ-001".to_string(), "Project".to_string());
+
+        assert!(noun.goal_noun_ids().is_empty());
+
+        noun.custom_fields = serde_json::json!({
+            "goal_noun_ids": [goal1.to_string(), goal2.to_string()]
+        });
+        let goals = noun.goal_noun_ids();
+        assert_eq!(goals.len(), 2);
+        assert!(goals.contains(&goal1));
+        assert!(goals.contains(&goal2));
+    }
+
+    #[test]
+    fn test_noun_auto_complete() {
+        let sow_id = Uuid::new_v4();
+        let mut noun = Noun::new(NounType::MileStone, sow_id, "IT-MILE-001".to_string(), "Milestone".to_string());
+
+        assert!(!noun.auto_complete());
+
+        noun.custom_fields = serde_json::json!({"auto_complete": true});
+        assert!(noun.auto_complete());
+    }
+}

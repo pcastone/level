@@ -110,18 +110,36 @@ mod tests {
         assert!(StateMachine::is_valid_transition(NounState::Escalated, NounState::Normal));
         assert!(StateMachine::is_valid_transition(NounState::Escalated, NounState::Completed));
         assert!(StateMachine::is_valid_transition(NounState::Escalated, NounState::Incompleted));
+        assert!(!StateMachine::is_valid_transition(NounState::Escalated, NounState::Closed));
     }
 
     #[test]
     fn test_valid_transitions_from_completed() {
         assert!(StateMachine::is_valid_transition(NounState::Completed, NounState::Closed));
         assert!(!StateMachine::is_valid_transition(NounState::Completed, NounState::Normal));
+        assert!(!StateMachine::is_valid_transition(NounState::Completed, NounState::Escalated));
+    }
+
+    #[test]
+    fn test_valid_transitions_from_incompleted() {
+        assert!(StateMachine::is_valid_transition(NounState::Incompleted, NounState::Closed));
+        assert!(!StateMachine::is_valid_transition(NounState::Incompleted, NounState::Normal));
+    }
+
+    #[test]
+    fn test_valid_transitions_from_closed() {
+        assert!(StateMachine::is_valid_transition(NounState::Closed, NounState::Archived));
+        assert!(!StateMachine::is_valid_transition(NounState::Closed, NounState::Normal));
+        assert!(!StateMachine::is_valid_transition(NounState::Closed, NounState::Completed));
     }
 
     #[test]
     fn test_archived_is_terminal() {
         assert!(StateMachine::is_terminal(NounState::Archived));
+        assert!(!StateMachine::is_terminal(NounState::Normal));
+        assert!(!StateMachine::is_terminal(NounState::Closed));
         assert!(!StateMachine::is_valid_transition(NounState::Archived, NounState::Normal));
+        assert!(StateMachine::valid_next_states(NounState::Archived).is_empty());
     }
 
     #[test]
@@ -129,7 +147,33 @@ mod tests {
         assert!(StateMachine::can_complete(NounState::Normal));
         assert!(StateMachine::can_complete(NounState::Escalated));
         assert!(!StateMachine::can_complete(NounState::Completed));
+        assert!(!StateMachine::can_complete(NounState::Incompleted));
         assert!(!StateMachine::can_complete(NounState::Closed));
+        assert!(!StateMachine::can_complete(NounState::Archived));
+    }
+
+    #[test]
+    fn test_can_incomplete() {
+        assert!(StateMachine::can_incomplete(NounState::Normal));
+        assert!(StateMachine::can_incomplete(NounState::Escalated));
+        assert!(!StateMachine::can_incomplete(NounState::Completed));
+        assert!(!StateMachine::can_incomplete(NounState::Closed));
+    }
+
+    #[test]
+    fn test_can_escalate() {
+        assert!(StateMachine::can_escalate(NounState::Normal));
+        assert!(!StateMachine::can_escalate(NounState::Escalated));
+        assert!(!StateMachine::can_escalate(NounState::Completed));
+        assert!(!StateMachine::can_escalate(NounState::Closed));
+    }
+
+    #[test]
+    fn test_can_normalize() {
+        assert!(StateMachine::can_normalize(NounState::Escalated));
+        assert!(!StateMachine::can_normalize(NounState::Normal));
+        assert!(!StateMachine::can_normalize(NounState::Completed));
+        assert!(!StateMachine::can_normalize(NounState::Closed));
     }
 
     #[test]
@@ -137,5 +181,41 @@ mod tests {
         assert!(StateMachine::can_close(NounState::Completed));
         assert!(StateMachine::can_close(NounState::Incompleted));
         assert!(!StateMachine::can_close(NounState::Normal));
+        assert!(!StateMachine::can_close(NounState::Escalated));
+        assert!(!StateMachine::can_close(NounState::Closed));
+    }
+
+    #[test]
+    fn test_can_modify() {
+        assert!(StateMachine::can_modify(NounState::Normal));
+        assert!(StateMachine::can_modify(NounState::Escalated));
+        assert!(!StateMachine::can_modify(NounState::Completed));
+        assert!(!StateMachine::can_modify(NounState::Incompleted));
+        assert!(!StateMachine::can_modify(NounState::Closed));
+        assert!(!StateMachine::can_modify(NounState::Archived));
+    }
+
+    #[test]
+    fn test_valid_next_states() {
+        let normal_next = StateMachine::valid_next_states(NounState::Normal);
+        assert_eq!(normal_next.len(), 3);
+        assert!(normal_next.contains(&NounState::Escalated));
+        assert!(normal_next.contains(&NounState::Completed));
+        assert!(normal_next.contains(&NounState::Incompleted));
+
+        let completed_next = StateMachine::valid_next_states(NounState::Completed);
+        assert_eq!(completed_next.len(), 1);
+        assert!(completed_next.contains(&NounState::Closed));
+    }
+
+    #[test]
+    fn test_validate_transition_ok() {
+        assert!(StateMachine::validate_transition(NounState::Normal, NounState::Completed).is_ok());
+    }
+
+    #[test]
+    fn test_validate_transition_err() {
+        let result = StateMachine::validate_transition(NounState::Normal, NounState::Closed);
+        assert!(result.is_err());
     }
 }

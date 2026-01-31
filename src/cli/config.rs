@@ -102,4 +102,93 @@ impl CliConfig {
                 "No SOW specified. Use --sow or set a default with 'level sow set-default <sow>'"
             ))
     }
+
+    /// Parse config from TOML string (for testing)
+    pub fn from_toml(content: &str) -> Result<Self> {
+        toml::from_str(content).context("Failed to parse TOML")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_config() {
+        let config = CliConfig::default();
+        assert_eq!(config.api_url, "http://localhost:3000");
+        assert!(config.api_key.is_none());
+        assert!(config.default_sow.is_none());
+        assert_eq!(config.output_format, "table");
+    }
+
+    #[test]
+    fn test_parse_toml_minimal() {
+        let toml = r#"
+            api_url = "http://example.com:8080"
+        "#;
+        let config = CliConfig::from_toml(toml).unwrap();
+        assert_eq!(config.api_url, "http://example.com:8080");
+        assert!(config.api_key.is_none());
+    }
+
+    #[test]
+    fn test_parse_toml_full() {
+        let toml = r#"
+            api_url = "https://api.level.io"
+            api_key = "secret-key-123"
+            default_sow = "IT"
+            output_format = "json"
+        "#;
+        let config = CliConfig::from_toml(toml).unwrap();
+        assert_eq!(config.api_url, "https://api.level.io");
+        assert_eq!(config.api_key, Some("secret-key-123".to_string()));
+        assert_eq!(config.default_sow, Some("IT".to_string()));
+        assert_eq!(config.output_format, "json");
+    }
+
+    #[test]
+    fn test_get_sow_with_arg() {
+        let config = CliConfig::default();
+        let result = config.get_sow(Some("HR"));
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), "HR");
+    }
+
+    #[test]
+    fn test_get_sow_with_default() {
+        let mut config = CliConfig::default();
+        config.default_sow = Some("IT".to_string());
+        let result = config.get_sow(None);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), "IT");
+    }
+
+    #[test]
+    fn test_get_sow_arg_overrides_default() {
+        let mut config = CliConfig::default();
+        config.default_sow = Some("IT".to_string());
+        let result = config.get_sow(Some("HR"));
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), "HR");
+    }
+
+    #[test]
+    fn test_get_sow_none_fails() {
+        let config = CliConfig::default();
+        let result = config.get_sow(None);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_serialize_config() {
+        let mut config = CliConfig::default();
+        config.api_key = Some("test-key".to_string());
+        config.default_sow = Some("PROJECT".to_string());
+
+        let toml_str = toml::to_string(&config).unwrap();
+        assert!(toml_str.contains("api_url"));
+        assert!(toml_str.contains("test-key"));
+        assert!(toml_str.contains("PROJECT"));
+    }
 }
