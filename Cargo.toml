@@ -1,0 +1,65 @@
+[package]
+name = "level"
+version = "0.1.0"
+edition = "2021"
+authors = ["Level Team"]
+description = "Project management system with Noun/Verb/Container grammar architecture"
+license = "MIT"
+
+[dependencies]
+# Web framework
+axum = { version = "0.7", features = ["macros"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace", "compression-gzip"] }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres", "uuid", "chrono", "json"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Configuration
+config = "0.14"
+toml = "0.8"
+
+# Logging & Tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Authentication & Security
+jsonwebtoken = "9"
+argon2 = "0.5"
+
+# Utilities
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1"
+anyhow = "1"
+async-trait = "0.1"
+validator = { version = "0.18", features = ["derive"] }
+
+# SSL/TLS
+rustls = "0.23"
+tokio-rustls = "0.26"
+rcgen = "0.13"
+
+# OpenAPI documentation
+utoipa = { version = "4", features = ["axum_extras", "uuid", "chrono"] }
+utoipa-swagger-ui = { version = "7", features = ["axum"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+sqlx = { version = "0.7", features = ["runtime-tokio", "postgres"] }
+
+[[bin]]
+name = "level"
+path = "src/main.rs"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3

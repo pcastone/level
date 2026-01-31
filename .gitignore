@@ -37,3 +37,8 @@ logs/*.log
 *.tmp
 *.temp
 .cache/
+
+
+# Added by cargo
+
+/target
